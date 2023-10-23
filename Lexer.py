@@ -1,84 +1,34 @@
-TOKEN_KEYWORD = 'keyword'
+def is_keyword(code):
+    keywords = ['int', 'float', 'while', 'main', 'const']
+    return code in keywords
 
-def lexer(file):
-    tokens = []
+
+def lexer(code):
     i = 0
-    code_length = len(file)
-
+    tokens = []
+    lexemes = []
+    code_length = len(code)
     while i < code_length:
-        char = file[i]
-
-        if char == "i":
-            i+=1
-            if char == "n":
-                i+=1
-                if char == "t":
-                    i+=1
-                    tokens.append((TOKEN_KEYWORD,"int"))
-        elif char == "f":
-            i+=1
-            if char == "l":
-                i+=1
-                if char == "o":
-                    i+=1
-                    if char == "a":
-                        i+=1
-                        if char == "t":
-                            i+=1
-                            tokens.append((TOKEN_KEYWORD,"float"))
-        if char == "w":
-            i+=1
-            if char == "h":
-                i+=1
-                if char == "i":
-                    i+=1
-                    if char == "l":
-                        i+=1
-                        if char == "e":
-                            i+=1
-                            tokens.append((TOKEN_KEYWORD,"while"))
-        elif char == "m":
-            i+=1
-            if char == "a":
-                i+=1
-                if char == "i":
-                    i+=1
-                    if char == "n":
-                        i+=1
-                        tokens.append((TOKEN_KEYWORD,"main"))
-        elif char == "c":
-            i+=1
-            if char == "o":
-                i+=1
-                if char == "n":
-                    i+=1
-                    if char == "s":
-                        i+=1
-                        if char == "t":
-                            i+=1
-                            tokens.append((TOKEN_KEYWORD,"const"))
-    return tokens
+        if code[i].isspace():
+            i += 1
+        elif code[i:i+2] == '//':
+            i = code.index('\n', i)
+        elif code[i:i+2] == '/*':
+            i = code.index('*/', i) + 2
+        elif code[i].isalpha():
+            j = i + 1
+            while j < len(code) and (code[j].isalpha() or code[j].isdigit()):
+                j += 1
+            if is_keyword(code[i:j]):
+                tokens.append('keyword')
+                lexemes.append(code[i:j])
+            i = j
+        else:
+            i += 1
+    return tokens, lexemes
 
 
-def user_input():
-    print("Input your calculation (Add an empty line to enter): ")
-
-    #it can take not only a single input line, so users can enter newlines and type their input,
-    #but once it is just an empty line input, the lexer will prompt to start
-    input_lines = []
-    while True:
-        line = input()
-        if not line:
-            break
-        input_lines.append(line)
-    return '\n'.join(input_lines)
-
-def main():
-    wee = user_input()
-    tokens = lexer(wee)
-    #printing each of the tokens and lexeme detected in the input
-    for token_type, token_value in tokens:
-        print(f"{TOKEN_KEYWORD if token_type == 'keyword' else token_type}: {token_value}")
-
-main()
-
+code = 'int main(){const float payment = 384.00;float bal;int month = 0;bal=15000;while (bal>0){printf("Month: %2d Balance: %10.2f\n", month, bal);bal=bal-payment+0.015*bal;month=month+1;}}'
+tokens, lexemes = lexer(code)
+for token, lexeme in zip(tokens, lexemes):
+    print(token, lexeme)
